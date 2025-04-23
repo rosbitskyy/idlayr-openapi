@@ -1,0 +1,8 @@
+/*
+ * Copyright (c) 2025.
+ * @Author: Rosbitskyy Ruslan
+ * @email: rosbitskyy@gmail.com
+ * @license Licensed under the MIT License (MIT)
+ */
+
+rootProject.name = "openapi-java-client"

@@ -1,0 +1,473 @@
+openapi: 3.0.4
+info:
+  title: IDLayr Passkeys
+  description: |
+    Base API definition for IDLayr Passkey Server
+  termsOfService: https://idlayr.com/terms/
+  contact:
+    email: help@idlayr.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+externalDocs:
+  description: Find out more about IDLayr
+  url: https://developer.idlayr.com/
+servers:
+  - url: https://eu.api.idlayr.com/v2/passkeys
+  - url: https://us.api.idlayr.com/v2/passkeys
+tags:
+  - name: user
+    description: Manage user instance
+  - name: passkeys
+    description: Manage passkeys
+  - name: validation
+    description: Validate passkeys assertions, and attestations
+paths:
+  /users:
+    get:
+      tags: [user]
+      summary: List user objects
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 100
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserArray'
+    post:
+      tags: [user]
+      summary: Create user object
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /users/{uid}:
+    get:
+      tags: [user]
+      summary: Get user object
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+    put:
+      tags: [user]
+      summary: Update user object
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags: [user]
+      summary: Delete user object
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+  /users/{uid}/passkeys:
+    get:
+      tags: [passkeys]
+      summary: List user passkeys
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of passkeys
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Passkey'
+  /users/{uid}/passkeys/{credid}:
+    get:
+      tags: [passkeys]
+      summary: Get specific passkey
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: credid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Passkey object
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Passkey'
+    put:
+      tags: [passkeys]
+      summary: Update passkey friendly name
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: credid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Passkey'
+      responses:
+        '200':
+          description: Updated
+    delete:
+      tags: [passkeys]
+      summary: Schedule passkey for deletion
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: credid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Passkey disabled
+  /users/{uid}/passkeys/enrol/init:
+    post:
+      tags: [validation]
+      summary: Start passkey enrollment
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: MakeCredentialRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebAuthnMakeCredentialRequest'
+  /users/{uid}/passkeys/enrol/complete:
+    post:
+      tags: [validation]
+      summary: Complete passkey enrollment
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebAuthnMakeCredentialResponse'
+      responses:
+        '200':
+          description: Passkey saved
+  /users/{uid}/passkeys/auth/init:
+    post:
+      tags: [validation]
+      summary: Start passkey authentication
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: GetAssertionRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebAuthnGetAssertionRequest'
+  /users/{uid}/passkeys/auth/complete:
+    post:
+      tags: [validation]
+      summary: Complete passkey authentication
+      parameters:
+        - name: uid
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebAuthnGetAssertionResponse'
+      responses:
+        '200':
+          description: Authentication result
+  /passkey/autofill/init:
+    post:
+      tags: [validation]
+      summary: Init autofill authentication (usernameless)
+      responses:
+        '200':
+          description: GetAssertionRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebAuthnGetAssertionRequest'
+  /passkey/autofill/complete:
+    post:
+      tags: [validation]
+      summary: Complete autofill authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebAuthnGetAssertionResponse'
+      responses:
+        '200':
+          description: Authentication result
+components:
+  schemas:
+    WebAuthnMakeCredentialRequest:
+      type: object
+      properties:
+        challenge:
+          type: string
+        rp:
+          type: object
+          properties:
+            name:
+              type: string
+            id:
+              type: string
+        user:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            displayName:
+              type: string
+        pubKeyCredParams:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              alg:
+                type: integer
+        timeout:
+          type: integer
+        excludeCredentials:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              transports:
+                type: array
+                items:
+                  type: string
+        authenticatorSelection:
+          type: object
+          properties:
+            authenticatorAttachment:
+              type: string
+            requireResidentKey:
+              type: boolean
+            userVerification:
+              type: string
+        attestation:
+          type: string
+
+    WebAuthnMakeCredentialResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        rawId:
+          type: string
+        response:
+          type: object
+          properties:
+            attestationObject:
+              type: string
+            clientDataJSON:
+              type: string
+        type:
+          type: string
+
+    WebAuthnGetAssertionRequest:
+      type: object
+      properties:
+        challenge:
+          type: string
+        allowCredentials:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              type:
+                type: string
+              transports:
+                type: array
+                items:
+                  type: string
+        timeout:
+          type: integer
+        userVerification:
+          type: string
+
+    WebAuthnGetAssertionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        rawId:
+          type: string
+        response:
+          type: object
+          properties:
+            authenticatorData:
+              type: string
+            clientDataJSON:
+              type: string
+            signature:
+              type: string
+            userHandle:
+              type: string
+        type:
+          type: string
+
+    User:
+      type: object
+      properties:
+        uid:
+          type: string
+          format: uuid
+        passkeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/Passkey'
+        phoneNumbers:
+          type: array
+          items:
+            $ref: '#/components/schemas/PhoneNumber'
+    PhoneNumber:
+      type: object
+      properties:
+        uid:
+          type: string
+          format: uuid
+        phone:
+          type: string
+        lastUsed:
+          type: string
+        lastSubscriberCheck:
+          type: object
+    Passkey:
+      type: object
+      properties:
+        credId:
+          type: string
+        counter:
+          type: integer
+          format: uint64
+        publicKey:
+          type: string
+          format: byte
+        aaguid:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [passkey, security-key]
+        friendlyName:
+          type: string
+        lastUsed:
+          type: string
+          format: date-time
+        attestationValid:
+          type: boolean
+        authenticatorInfo:
+          $ref: '#/components/schemas/AuthenticatorInfo'
+    AuthenticatorInfo:
+      type: object
+      properties:
+        Name:
+          type: string
+        IconDark:
+          type: string
+        IconLight:
+          type: string
+        FidoCertified:
+          type: boolean
+        FidoCertifiedLevel:
+          type: string
+    UserArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/User'
